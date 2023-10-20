@@ -41,7 +41,7 @@ function App(){
       <div className="app">
         <Routes>
         <Route path='/login' element={[<Login/>]}/>
-          <Route path='/' element={[<Header/>,<Header/>,<Home/>]}/>
+          <Route path='/' element={[<Header/>,<Home/>]}/>
           <Route path='/checkout' element={[<Header/>,<Checkout />]}/>
         </Routes>
       </div>
