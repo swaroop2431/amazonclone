@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react'
 import './Payment.css'
 import CheckoutProduct from './CheckoutProduct'
 import { useStateValue } from './StateProvider'
-import { Link, Navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import CurrencyFormat from 'react-currency-format';
 import { getBasketTotal } from './reducer';
 import axios from './axios'
+import { db } from './BaseFire';
+import { collection, doc, setDoc} from 'firebase/firestore';
+
+
 
 
 function Payment() {
+
+    const navigate = useNavigate()
 
     const [{basket, user}, dispatch] = useStateValue();
 
@@ -25,14 +31,25 @@ function Payment() {
 
     useEffect(() => {
         const getClientSecret = async () =>{
+            // try{
+            //     const response = await axios({
+            //         method: 'post',
+            //         url: `/payments/create?total=${getBasketTotal(basket) * 100}`,
+            //     })
+            // }
+            // catch(error){
+            //     console.log('ErrorFecting:', error)
+            // }
             const response = await axios({
                 method: 'post',
-                url: `/payment/create?total=${getBasketTotal(basket) * 100}`
+                url: `/payments/create?total=${getBasketTotal(basket) * 100}`,
             })
             setClientSecret(response.data.clientSecret)
         }
         getClientSecret()
     }, [basket])
+    console.log('The secret is', clientSecret)
+    console.log('user id', user)
 
 
     const handleSubmit = async (event) =>{
@@ -42,15 +59,58 @@ function Payment() {
 
         const payload = await stripe.confirmCardPayment(clientSecret, {
             payment_method: {
-                card: elements.getElement(CardElement)
-            }
-        }).then(({ paymentIntent}) => {
+                card: elements.getElement(CardElement),
+            //     billing_details: {
+            //         name: 'Name',
+            //         description: 'Software Development services'
+            //     },
+             },
+            // receipt_email: 'saiswaroop5521@gmail.com',
 
-            setSucceeded(true)
-            setError(null)
-            setProcessing(false)
+        })
 
-            Navigate.replace('/orders')
+        // if(payload.error){
+        //     setError(`Payment failed: ${payload.error.message}`);
+        //     setProcessing(false)
+        // } else {
+        //     const paymentIntent = payload.paymentIntent;
+        //     const docRef = doc(collection(db, 'users', user?.uid, 'orders'),paymentIntent.id);
+        //     await setDoc(docRef, {
+        //         basket: basket,
+        //         amount: paymentIntent.amount,
+        //         created: paymentIntent.created,
+        //     })
+        //         setSucceeded(true)
+        //         setError(null)
+        //         setProcessing(false)
+
+        //         dispatch({
+        //             type: 'EMPTY_BASKET',
+        //         })
+        //         navigate('/orders')
+        // }
+        .then(({ paymentIntent}) => {
+            console.log("Error:",paymentIntent)
+
+            // db.collection('users')
+            //     .doc(user?.id)
+            //     .collection('orders')
+            //     .doc(paymentIntent.id)
+            //     .set({
+            //         basket: basket,
+            //         amount: paymentIntent.amount,
+            //         created: paymentIntent.created
+            //     })
+
+            // setSucceeded(true)
+            // setError(null)
+            // setProcessing(false)
+
+            // dispatch({
+            //     type: 'EMPTY_BASKET'
+            // })
+
+            // navigate('/orders')
         })
     }
     const handleChange = event =>{
@@ -103,7 +163,7 @@ function Payment() {
             </div>
             <div className="payment__details">
                 <form onSubmit={handleSubmit}>
-                    <CardElement onChangle={handleChange} />
+                    <CardElement onChange={handleChange} />
 
                     <div className="payment__priceContainer">
                         <CurrencyFormat
