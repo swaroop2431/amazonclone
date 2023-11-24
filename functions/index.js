@@ -24,8 +24,6 @@
 const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
-
-// eslint-disable-next-line max-len
 const stripe = require("stripe")("sk_test_51O440wSGkCgHBrFZVBRiOfJc3V2zXfK8eGIPM8oDdhDtCHRmLoEZBkndtP4ZUz0Ee1JrqxFq7KYdtB0gJagXJdmg00JXz8XMhM");
 
 // App config
@@ -42,7 +40,6 @@ app.post("/payments/create", async (request, response) =>{
     const total = request.query.total;
     console.log("Payment Request Received!!!", total);
 
-    // eslint-disable-next-line no-undef
     const paymentIntent = await stripe.paymentIntents.create({
         amount: total, // subunits
         currency: "usd",
@@ -55,3 +52,4 @@ app.post("/payments/create", async (request, response) =>{
 exports.api = functions.https.onRequest(app);
 
 // http://127.0.0.1:5001/clone-a2247/us-central1/api
+

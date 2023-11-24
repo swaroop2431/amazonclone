@@ -7,8 +7,6 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import CurrencyFormat from 'react-currency-format';
 import { getBasketTotal } from './reducer';
 import axios from './axios'
-import { db } from './BaseFire';
-import { collection, doc, setDoc} from 'firebase/firestore';
 
 function Payment() {
 
@@ -20,7 +18,7 @@ function Payment() {
     const elements = useElements()
 
     const [succeeded, setSucceeded] = useState(false)
-    const [processing, setProcessing] = useState(false)
+    const [processing, setProcessing] = useState("")
 
     const [error, setError] = useState(null)
     const [disabled, setDisabled] = useState(true)
@@ -50,46 +48,20 @@ function Payment() {
                 card: elements.getElement(CardElement),
              },
         })
-        if(payload.error){
+
+        .then(({ paymentIntent }) => {
+            console.log("Error:",paymentIntent)
+
+            setSucceeded(true)
+            setError(null)
             setProcessing(false)
-        } else {
-            const paymentIntent = payload.paymentIntent;
-            const docRef = doc(collection(db, 'users', user?.uid, 'orders'),paymentIntent.id);
-            await setDoc(docRef, {
-                basket: basket,
-                amount: paymentIntent.amount,
-                created: paymentIntent.created,
+
+            dispatch({
+                type: 'EMPTY_BASKET'
             })
-                setSucceeded(true)
-                setError(null)
-                setProcessing(false)
 
-                dispatch({
-                    type: 'EMPTY_BASKET',
-                })
-                navigate('/orders')
-        }
-        // .then(({ paymentIntent }) => {
-        //     console.log("Error:",paymentIntent)
-        //     // db.collection('users')
-        //     //     .doc(user?.uid)
-        //     //     .collection('orders')
-        //     //     .doc(paymentIntent.id)
-        //     //     .set({
-        //     //         basket: basket,
-        //     //         amount: paymentIntent.amount,
-        //     //         created: paymentIntent.created
-        //     //     })
-        //     setSucceeded(true)
-        //     setError(null)
-        //     setProcessing(false)
-
-        //     dispatch({
-        //         type: 'EMPTY_BASKET'
-        //     })
-
-        //     navigate('/orders')
-        // })
+            navigate('/orders')
+        })
     }
     const handleChange = event =>{
         setDisabled(event.empty)

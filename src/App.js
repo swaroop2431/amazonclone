@@ -42,7 +42,7 @@ function App(){
     <BrowserRouter>
       <div className="app">
         <Routes>
-        <Route path='/login' element={[<Login/>]}/>
+          <Route path='/login' element={[<Login/>]}/>
           <Route path='/' element={[<Header/>,<Home/>]}/>
           <Route path='/checkout' element={[<Header/>,<Checkout/>]}/>
           <Route path='/payment' element={[<Header/>,<Elements stripe={promise}><Payment /></Elements>]}/>
